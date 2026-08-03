@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: disc-golf
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/postgres
+  modulith:
+    events:
+      republish-outstanding-events-on-restart: true
+logging:
+  level:
+    root: info
+    vip:
+      xelapedia: debug

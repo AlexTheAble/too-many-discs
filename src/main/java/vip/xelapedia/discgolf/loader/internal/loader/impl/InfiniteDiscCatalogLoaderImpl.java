@@ -1,12 +1,13 @@
-package vip.xelapedia.discgolf.loader.internal.service.impl;
+package vip.xelapedia.discgolf.loader.internal.loader.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,7 @@ import vip.xelapedia.discgolf.loader.internal.entity.Source;
 import vip.xelapedia.discgolf.loader.internal.entity.SourcePage;
 import vip.xelapedia.discgolf.loader.internal.enums.InfiniteDiscsPageType;
 import vip.xelapedia.discgolf.loader.internal.eventing.LoaderEventPublisher;
-import vip.xelapedia.discgolf.loader.internal.repository.PageRepository;
-import vip.xelapedia.discgolf.loader.internal.repository.SourceRepository;
-import vip.xelapedia.discgolf.loader.internal.service.LoadingService;
+import vip.xelapedia.discgolf.loader.internal.loader.CatalogLoader;
 import vip.xelapedia.discgolf.loader.internal.service.SourceService;
 import vip.xelapedia.discgolf.loader.internal.util.HtmlParserUtil;
 import vip.xelapedia.discgolf.loader.internal.util.KeyGenerator;
@@ -30,13 +29,8 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class InfiniteDiscLoadingServiceImpl implements LoadingService {
-
-    //TODO Bug where flight numbers are not consistently being captured
-    //TODO get dimension data
+public class InfiniteDiscCatalogLoaderImpl implements CatalogLoader {
     private final InfiniteDiscsClientProxy infiniteDiscsClientProxy;
-    private final SourceRepository sourceRepository;
-    private final PageRepository pageRepository;
     private final SourceService sourceService;
     private final LoaderEventPublisher eventPublisher;
 
@@ -46,7 +40,7 @@ public class InfiniteDiscLoadingServiceImpl implements LoadingService {
     @Override
     public void preformLoad(final boolean buildPages) {
         log.debug(">> InfiniteDiscLoadingServiceImpl.preformLoad");
-        final Source source = sourceRepository.findByKey(SOURCE_KEY);
+        final Source source = sourceService.getSourceByKey(SOURCE_KEY);
         if (buildPages) {
             log.debug("Loading pages for source: {}...", source.getName());
             sourceService.clearPageDataForSource(source);
@@ -68,14 +62,14 @@ public class InfiniteDiscLoadingServiceImpl implements LoadingService {
     }
 
     private void buildAndSendCatalogEvents(final Source source) {
-        Page<SourcePage> page = pageRepository.findAllBySourceAndType(source, InfiniteDiscsPageType.MOLD.name(), Pageable.ofSize(PAGE_SIZE).withPage(0));
+        Page<SourcePage> page = sourceService.findAllBySourceAndType(source, InfiniteDiscsPageType.MOLD, Pageable.ofSize(PAGE_SIZE).withPage(0));
         page.stream().parallel()
                 .map(SourcePage::getHtml)
                 .map(HtmlParserUtil::parseHtmlString)
                 .forEach(this::sendCatalogLoadEvent);
 
         while (page.hasNext()) {
-            page = pageRepository.findAllBySourceAndType(source, InfiniteDiscsPageType.MOLD.name(), page.nextPageable());
+            page = sourceService.findAllBySourceAndType(source, InfiniteDiscsPageType.MOLD, page.nextPageable());
             page.stream().parallel()
                     .map(ele -> HtmlParserUtil.fetchDocument(source.getBaseUrl() + ele.getPath()))
                     .filter(Optional::isPresent)
@@ -99,6 +93,7 @@ public class InfiniteDiscLoadingServiceImpl implements LoadingService {
     private CatalogLoadEvent.MoldLoad buildMoldLoadEvent(final Document document) {
         final String name = extractName(document);
         final List<Double> flightNumbers = extractFlightNumbers(document);
+        final List<Double> dimensionData = extractDimensionData(document);
 
         final CatalogLoadEvent.MoldLoad.MoldLoadBuilder builder = CatalogLoadEvent.MoldLoad.builder()
                 .key(KeyGenerator.generateKey(name))
@@ -109,6 +104,14 @@ public class InfiniteDiscLoadingServiceImpl implements LoadingService {
                     .turn(flightNumbers.get(2))
                     .fade(flightNumbers.get(3));
         }
+
+        if (Objects.nonNull(dimensionData)) {
+            builder.diameter(dimensionData.get(0))
+                    .height(dimensionData.get(1))
+                    .rimDepth(dimensionData.get(2))
+                    .rimWidth(dimensionData.get(3));
+        }
+
         return builder.build();
     }
 
@@ -156,9 +159,8 @@ public class InfiniteDiscLoadingServiceImpl implements LoadingService {
     }
 
     private static List<Double> extractFlightNumbers(final Document document) {
-
         final List<Double> flightNumbers = Arrays.stream(document.select("div:nth-child(1) > h5 > strong").text().split("/"))
-                .filter(StringUtils::isNumeric)
+                .filter(NumberUtils::isCreatable)
                 .map(Double::parseDouble)
                 .toList();
 
@@ -166,6 +168,25 @@ public class InfiniteDiscLoadingServiceImpl implements LoadingService {
             return null;
         }
         return flightNumbers;
+    }
+
+    private static List<Double> extractDimensionData(final Document document) {
+        final List<String> dimensionStrings = document.select(".list").getFirst().childNodes().stream()
+                .filter(e -> e instanceof Element)
+                .map(Node::nodeValue)
+                .toList();
+
+        if (dimensionStrings.size() < 4) {
+            return null;
+        }
+
+        final List<Double> dimensions = new ArrayList<>(4);
+        dimensions.add(0, Double.parseDouble(dimensionStrings.get(0).split(" ")[1])); // Diameter
+        dimensions.add(1, Double.parseDouble(dimensionStrings.get(1).split(" ")[1])); // Height
+        dimensions.add(2, Double.parseDouble(dimensionStrings.get(2).split(" ")[2])); // Rim Depth
+        dimensions.add(3, Double.parseDouble(dimensionStrings.get(3).split(" ")[2])); // Rim Width
+
+        return dimensions;
     }
 
     private static String extractBrandName(final Document document) {

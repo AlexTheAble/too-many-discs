@@ -15,8 +15,7 @@ public final class HtmlParserUtil {
         } catch (IOException e) {
             return Optional.empty();
         }
-
-        return Optional.ofNullable(doc);
+        return Optional.of(doc);
     }
 
     public static Document parseHtmlString(final String html) {

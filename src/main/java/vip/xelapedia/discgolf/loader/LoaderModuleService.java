@@ -3,15 +3,15 @@ package vip.xelapedia.discgolf.loader;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import vip.xelapedia.discgolf.loader.internal.service.LoadingService;
+import vip.xelapedia.discgolf.loader.internal.loader.CatalogLoader;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class LoaderModuleService {
-    private final LoadingService infiniteDiscLoader;
+    private final CatalogLoader catalogLoader;
 
-    public void doLoad() {
-        infiniteDiscLoader.preformLoad(false);
+    public void doLoad(final boolean reloadPages) {
+        catalogLoader.preformLoad(reloadPages);
     }
 }

@@ -84,7 +84,6 @@ public class LoaderEventListener {
                     .key(plasticLoad.key())
                     .name(plasticLoad.name())
                     .build();
-            return discService.persistPlastic(plastic);
         } else {
             plastic = plasticOptional.get();
             plastic.setName(plasticLoad.name());
@@ -124,8 +123,8 @@ public class LoaderEventListener {
             mold.setName(moldLoad.name());
             mold.setRimWidth(moldLoad.rimWidth());
             mold.setRimDepth(moldLoad.rimDepth());
+            mold.setDiameter(moldLoad.diameter());
             mold.setHeight(moldLoad.height());
-            mold.setDiameter(moldLoad.height());
             mold.setFade(moldLoad.fade());
             mold.setGlide(moldLoad.glide());
             mold.setSpeed(moldLoad.speed());

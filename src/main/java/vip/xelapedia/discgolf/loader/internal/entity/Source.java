@@ -27,5 +27,5 @@ public class Source extends BaseEntity {
     private int priority;
 
     @OneToMany(mappedBy = "source")
-    private List<Page> pages;
+    private List<SourcePage> sourcePages;
 }

@@ -1,24 +1,56 @@
 --- CREATE EVENT PUBLICATION TABLE FOR INTER_MODULE EVENTING
 CREATE TABLE IF NOT EXISTS event_publication
 (
-    id                     UUID NOT NULL,
-    listener_id            TEXT NOT NULL,
-    event_type             TEXT NOT NULL,
-    serialized_event       TEXT NOT NULL,
-    publication_date       TIMESTAMP WITH TIME ZONE NOT NULL,
-    completion_date        TIMESTAMP WITH TIME ZONE,
-    status                 TEXT,
-    completion_attempts    INT,
-    last_resubmission_date TIMESTAMP WITH TIME ZONE,
-    PRIMARY KEY (id)
+    id
+    UUID
+    NOT
+    NULL,
+    listener_id
+    TEXT
+    NOT
+    NULL,
+    event_type
+    TEXT
+    NOT
+    NULL,
+    serialized_event
+    TEXT
+    NOT
+    NULL,
+    publication_date
+    TIMESTAMP
+    WITH
+    TIME
+    ZONE
+    NOT
+    NULL,
+    completion_date
+    TIMESTAMP
+    WITH
+    TIME
+    ZONE,
+    status
+    TEXT,
+    completion_attempts
+    INT,
+    last_resubmission_date
+    TIMESTAMP
+    WITH
+    TIME
+    ZONE,
+    PRIMARY
+    KEY
+(
+    id
+)
     );
 CREATE INDEX IF NOT EXISTS event_publication_serialized_event_hash_idx ON event_publication USING hash(serialized_event);
 CREATE INDEX IF NOT EXISTS event_publication_by_completion_date_idx ON event_publication (completion_date);
 
 --- DISCS MODULE TABLE CREATION
-CREATE SCHEMA discs;
+CREATE SCHEMA catalog;
 
-CREATE TABLE discs.manufacturer
+CREATE TABLE catalog.manufacturer
 (
     id         UUID PRIMARY KEY DEFAULT uuidv7(),
     key        VARCHAR(250) NOT NULL,
@@ -28,7 +60,7 @@ CREATE TABLE discs.manufacturer
     UNIQUE (key)
 );
 
-CREATE TABLE discs.plastic
+CREATE TABLE catalog.plastic
 (
     id         UUID PRIMARY KEY DEFAULT uuidv7(),
     key        VARCHAR(250) NOT NULL,
@@ -38,38 +70,37 @@ CREATE TABLE discs.plastic
     UNIQUE (key)
 );
 
-CREATE TABLE discs.mold
+CREATE TABLE catalog.mold
 (
     id         UUID PRIMARY KEY DEFAULT uuidv7(),
     key        VARCHAR(250) NOT NULL,
     name       VARCHAR(250) NOT NULL,
-    speed      INT,
-    glide      INT,
-    turn       INT,
-    fade       INT,
+    speed      DECIMAL,
+    glide      DECIMAL,
+    turn       DECIMAL,
+    fade       DECIMAL,
     diameter   DECIMAL,
     height     DECIMAL,
-    rimDepth   DECIMAL,
-    rimWidth   DECIMAL,
+    rim_depth  DECIMAL,
+    rim_width  DECIMAL,
     createdDT  timestamp    NOT NULL,
     modifiedDT timestamp,
     UNIQUE (key)
 );
 
-CREATE TABLE discs.disc
+CREATE TABLE catalog.catalog_disc
 (
     id              UUID PRIMARY KEY DEFAULT uuidv7(),
     key             VARCHAR(250) NOT NULL,
-    weight          DECIMAL,
     manufacturer_id UUID         NOT NULL,
     plastic_id      UUID         NOT NULL,
     mold_id         UUID         NOT NULL,
     createdDT       timestamp    NOT NULL,
     modifiedDT      timestamp,
     UNIQUE (key),
-    CONSTRAINT fk_manufacturer FOREIGN KEY (manufacturer_id) REFERENCES discs.manufacturer (id),
-    CONSTRAINT fk_plastic FOREIGN KEY (plastic_id) REFERENCES discs.plastic (id),
-    CONSTRAINT fk_mold FOREIGN KEY (mold_id) REFERENCES discs.mold (id)
+    CONSTRAINT fk_manufacturer FOREIGN KEY (manufacturer_id) REFERENCES catalog.manufacturer (id),
+    CONSTRAINT fk_plastic FOREIGN KEY (plastic_id) REFERENCES catalog.plastic (id),
+    CONSTRAINT fk_mold FOREIGN KEY (mold_id) REFERENCES catalog.mold (id)
 );
 
 --- LOADER MODULE TABLE CREATION
@@ -77,13 +108,15 @@ CREATE SCHEMA loader;
 
 CREATE TABLE loader.page
 (
-    id            UUID PRIMARY KEY DEFAULT uuidv7(),
-    path          VARCHAR(250) NOT NULL,
-    isActive      BOOLEAN,
-    lastVisitedDT TIMESTAMP,
-    source_id     UUID         NOT NULL,
-    createdDT     TIMESTAMP    NOT NULL,
-    modifiedDT    TIMESTAMP,
+    id             UUID PRIMARY KEY DEFAULT uuidv7(),
+    path           VARCHAR(250) NOT NULL,
+    type           VARCHAR(250) NOT NULL,
+    is_active      BOOLEAN,
+    last_visiteddt TIMESTAMP,
+    source_id      UUID         NOT NULL,
+    html           TEXT         NOT NULL,
+    createdDT      TIMESTAMP    NOT NULL,
+    modifiedDT     TIMESTAMP,
     UNIQUE (path, source_id)
 );
 

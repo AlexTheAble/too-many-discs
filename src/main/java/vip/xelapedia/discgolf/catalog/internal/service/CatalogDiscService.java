@@ -65,7 +65,7 @@ public class CatalogDiscService {
 
     public PagedModel<MoldWebResponse> searchMolds(final List<SearchCriteria> search,
                                                    final Pageable pageable) {
-        final SearchSpecificationBuilder<Mold> builder = new SearchSpecificationBuilder<>(search);
+        final SearchSpecificationBuilder builder = new SearchSpecificationBuilder(search);
         final Page<Mold> moldPage = moldRepository.findAll(builder.build(), pageable);
 
         final List<CatalogDisc> catalogDiscs = catalogDiscRepository.findByMoldIn(moldPage.getContent());
@@ -88,6 +88,7 @@ public class CatalogDiscService {
                 MoldWebResponse.builder()
                         .id(mold.getId())
                         .name(mold.getName())
+                        .pageLink(mold.getPageLink())
                         .speed(mold.getSpeed())
                         .glide(mold.getGlide())
                         .turn(mold.getTurn())
@@ -101,7 +102,7 @@ public class CatalogDiscService {
                         .build()
         ).toList();
 
-        return new PagedModel<MoldWebResponse>(new PageImpl<>(moldWebResponses, moldPage.getPageable(), moldPage.getTotalElements()));
+        return new PagedModel<>(new PageImpl<>(moldWebResponses, moldPage.getPageable(), moldPage.getTotalElements()));
     }
 
     @Transactional

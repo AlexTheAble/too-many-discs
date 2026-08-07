@@ -9,6 +9,7 @@ import java.util.UUID;
 @Builder
 public record MoldWebResponse(UUID id,
                               String name,
+                              String pageLink,
                               double speed,
                               double glide,
                               double turn,

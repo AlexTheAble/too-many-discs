@@ -22,6 +22,7 @@ public record CatalogLoadEvent(@NonNull String key,
     @Builder
     public record MoldLoad(@NonNull String key,
                            @NonNull String name,
+                           String pageLink,
                            double speed,
                            double glide,
                            double turn,

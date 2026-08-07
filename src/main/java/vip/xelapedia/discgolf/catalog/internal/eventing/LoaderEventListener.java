@@ -109,6 +109,7 @@ public class LoaderEventListener {
             mold = Mold.builder()
                     .key(moldLoad.key())
                     .name(moldLoad.name())
+                    .pageLink(moldLoad.pageLink())
                     .rimWidth(moldLoad.rimWidth())
                     .rimDepth(moldLoad.rimDepth())
                     .height(moldLoad.height())
@@ -121,6 +122,7 @@ public class LoaderEventListener {
         } else {
             mold = optionalMold.get();
             mold.setName(moldLoad.name());
+            mold.setPageLink(moldLoad.pageLink());
             mold.setRimWidth(moldLoad.rimWidth());
             mold.setRimDepth(moldLoad.rimDepth());
             mold.setDiameter(moldLoad.diameter());

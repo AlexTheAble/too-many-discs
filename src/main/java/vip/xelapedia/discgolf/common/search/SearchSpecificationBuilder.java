@@ -6,7 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 
 @AllArgsConstructor
-public class SearchSpecificationBuilder<T> {
+public class SearchSpecificationBuilder {
     private final List<SearchCriteria> criteria;
 
     public <T> Specification<T> build() {

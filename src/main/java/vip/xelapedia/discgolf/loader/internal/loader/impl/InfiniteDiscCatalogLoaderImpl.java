@@ -97,7 +97,8 @@ public class InfiniteDiscCatalogLoaderImpl implements CatalogLoader {
 
         final CatalogLoadEvent.MoldLoad.MoldLoadBuilder builder = CatalogLoadEvent.MoldLoad.builder()
                 .key(KeyGenerator.generateKey(name))
-                .name(name);
+                .name(name)
+                .pageLink(document.location());
         if (Objects.nonNull(flightNumbers)) {
             builder.speed(flightNumbers.get(0))
                     .glide(flightNumbers.get(1))

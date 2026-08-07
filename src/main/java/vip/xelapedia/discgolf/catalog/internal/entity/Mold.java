@@ -20,6 +20,7 @@ import java.util.List;
 public class Mold extends BaseEntity {
     private String key;
     private String name;
+    private String pageLink;
 
     private double speed;
     private double glide;

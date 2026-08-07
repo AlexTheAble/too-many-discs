@@ -14,6 +14,6 @@ public class ApplicationDataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        loaderModuleService.doLoad(false);
+//        loaderModuleService.doLoad(false);
     }
 }

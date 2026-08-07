@@ -10,7 +10,7 @@ import vip.xelapedia.discgolf.catalog.internal.entity.CatalogDisc;
 import vip.xelapedia.discgolf.catalog.internal.entity.Manufacturer;
 import vip.xelapedia.discgolf.catalog.internal.entity.Mold;
 import vip.xelapedia.discgolf.catalog.internal.entity.Plastic;
-import vip.xelapedia.discgolf.catalog.internal.service.DiscService;
+import vip.xelapedia.discgolf.catalog.internal.service.CatalogDiscService;
 import vip.xelapedia.discgolf.loader.dto.events.CatalogLoadEvent;
 
 import java.util.Optional;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @Slf4j
 public class LoaderEventListener {
-    private DiscService discService;
+    private CatalogDiscService discService;
 
     @TransactionalEventListener
     @Async

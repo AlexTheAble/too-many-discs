@@ -14,4 +14,6 @@ public interface CatalogDiscRepository extends CrudRepository<CatalogDisc, UUID>
     Optional<CatalogDisc> findByKey(String key);
 
     List<CatalogDisc> findByMold(Mold mold);
+
+    List<CatalogDisc> findByMoldIn(List<Mold> molds);
 }

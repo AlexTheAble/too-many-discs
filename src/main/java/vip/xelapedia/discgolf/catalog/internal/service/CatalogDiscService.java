@@ -1,6 +1,10 @@
 package vip.xelapedia.discgolf.catalog.internal.service;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import vip.xelapedia.discgolf.catalog.controller.dto.response.ManufacturerWebResponse;
 import vip.xelapedia.discgolf.catalog.controller.dto.response.MoldWebResponse;
 import vip.xelapedia.discgolf.catalog.controller.dto.response.PlasticWebResponse;
@@ -15,10 +19,10 @@ import vip.xelapedia.discgolf.catalog.internal.repository.PlasticRepository;
 import vip.xelapedia.discgolf.catalog.internal.repository.ManufacturerRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import vip.xelapedia.discgolf.catalog.internal.search.MoldSearchSpecificationBuilder;
+import vip.xelapedia.discgolf.common.search.SearchCriteria;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -57,6 +61,48 @@ public class CatalogDiscService {
                 .manufacturers(manufacturers)
                 .plastics(plastics)
                 .build();
+    }
+
+    public PagedModel<MoldWebResponse> searchMolds(final List<SearchCriteria> search,
+                                             final Pageable pageable) {
+        final MoldSearchSpecificationBuilder builder = new MoldSearchSpecificationBuilder(search);
+        final Page<Mold> moldPage = moldRepository.findAll(builder.build(), pageable);
+
+        final List<CatalogDisc> catalogDiscs = catalogDiscRepository.findByMoldIn(moldPage.getContent());
+
+        final Map<Mold, List<PlasticWebResponse>> plasticWebResponseMap = new HashMap<>();
+        catalogDiscs.forEach(disc -> {
+            plasticWebResponseMap.computeIfAbsent(disc.getMold(), _ -> new ArrayList<>());
+            final Plastic plastic = disc.getPlastic();
+            plasticWebResponseMap.get(disc.getMold()).add(new PlasticWebResponse(plastic.getId(), plastic.getName()));
+        });
+
+        final Map<Mold, List<ManufacturerWebResponse>> manufacturerWebResponseMap = new HashMap<>();
+        catalogDiscs.forEach(disc -> {
+            manufacturerWebResponseMap.computeIfAbsent(disc.getMold(), _ -> new ArrayList<>());
+            final Manufacturer manufacturer = disc.getManufacturer();
+            manufacturerWebResponseMap.get(disc.getMold()).add(new ManufacturerWebResponse(manufacturer.getId(), manufacturer.getName()));
+        });
+
+        final List<MoldWebResponse> moldWebResponses = moldPage.stream().map(mold ->
+                MoldWebResponse.builder()
+                        .id(mold.getId())
+                        .name(mold.getName())
+                        .speed(mold.getSpeed())
+                        .glide(mold.getGlide())
+                        .turn(mold.getTurn())
+                        .fade(mold.getFade())
+                        .diameter(mold.getDiameter())
+                        .height(mold.getHeight())
+                        .rimDepth(mold.getRimDepth())
+                        .rimWidth(mold.getRimWidth())
+                        .manufacturers(manufacturerWebResponseMap.get(mold).stream().distinct().toList())
+                        .plastics(plasticWebResponseMap.get(mold).stream().toList())
+                        .build()
+        ).toList();
+
+        return new PagedModel<MoldWebResponse>(new PageImpl<>(moldWebResponses, moldPage.getPageable(), moldPage.getTotalElements()));
+
     }
 
     @Transactional

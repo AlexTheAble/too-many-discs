@@ -1,4 +1,4 @@
-package vip.xelapedia.discgolf.catalog.error;
+package vip.xelapedia.discgolf.catalog.internal.error;
 
 import org.springframework.http.HttpStatus;
 import vip.xelapedia.discgolf.common.error.CommonRestException;

@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import vip.xelapedia.discgolf.catalog.controller.dto.response.ManufacturerWebResponse;
 import vip.xelapedia.discgolf.catalog.controller.dto.response.MoldWebResponse;
 import vip.xelapedia.discgolf.catalog.controller.dto.response.PlasticWebResponse;
-import vip.xelapedia.discgolf.catalog.error.MoldNotFoundException;
+import vip.xelapedia.discgolf.catalog.internal.error.MoldNotFoundException;
 import vip.xelapedia.discgolf.catalog.internal.entity.CatalogDisc;
 import vip.xelapedia.discgolf.catalog.internal.entity.Manufacturer;
 import vip.xelapedia.discgolf.catalog.internal.entity.Mold;
@@ -34,10 +34,12 @@ public class CatalogDiscService {
         final List<CatalogDisc> catalogDiscs = catalogDiscRepository.findByMold(mold);
 
         final List<PlasticWebResponse> plastics = catalogDiscs.stream().map(CatalogDisc::getPlastic)
+                .distinct()
                 .map(plastic -> new PlasticWebResponse(plastic.getId(), plastic.getName()))
                 .toList();
 
         final List<ManufacturerWebResponse> manufacturers = catalogDiscs.stream().map(CatalogDisc::getManufacturer)
+                .distinct()
                 .map(manufacturer -> new ManufacturerWebResponse(manufacturer.getId(), manufacturer.getName()))
                 .toList();
 

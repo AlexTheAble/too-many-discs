@@ -36,6 +36,9 @@ public class SearchSpecification<T> implements Specification<T> {
             case GREATER_THAN_OR_EQUAL -> {
                 return criteriaBuilder.greaterThanOrEqualTo(root.get(criteria.key()), criteria.value().toString());
             }
+            case LIKE -> {
+                return criteriaBuilder.like(root.get(criteria.key()), criteria.value().toString());
+            }
         }
         return null;
     }

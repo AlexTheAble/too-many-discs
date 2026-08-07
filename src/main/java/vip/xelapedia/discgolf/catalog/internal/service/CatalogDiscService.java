@@ -102,7 +102,6 @@ public class CatalogDiscService {
         ).toList();
 
         return new PagedModel<MoldWebResponse>(new PageImpl<>(moldWebResponses, moldPage.getPageable(), moldPage.getTotalElements()));
-
     }
 
     @Transactional

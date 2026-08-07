@@ -1,23 +1,20 @@
-package vip.xelapedia.discgolf.catalog.internal.search;
+package vip.xelapedia.discgolf.common.search;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
 import lombok.AllArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
-import vip.xelapedia.discgolf.catalog.internal.entity.Mold;
-import vip.xelapedia.discgolf.common.search.SearchCriteria;
 
 @AllArgsConstructor
-public class MoldSearchSpecification implements Specification<Mold> {
+public class SearchSpecification<T> implements Specification<T> {
     private final SearchCriteria criteria;
 
     @Override
-    public @Nullable Predicate toPredicate(@NonNull final Root<Mold> root,
+    public @Nullable Predicate toPredicate(@NonNull final Root<T> root,
                                            @NonNull final CriteriaQuery<?> query,
                                            @NonNull final CriteriaBuilder criteriaBuilder) {
         switch (criteria.operation()) {

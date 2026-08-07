@@ -19,8 +19,8 @@ import vip.xelapedia.discgolf.catalog.internal.repository.PlasticRepository;
 import vip.xelapedia.discgolf.catalog.internal.repository.ManufacturerRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import vip.xelapedia.discgolf.catalog.internal.search.MoldSearchSpecificationBuilder;
 import vip.xelapedia.discgolf.common.search.SearchCriteria;
+import vip.xelapedia.discgolf.common.search.SearchSpecificationBuilder;
 
 import java.util.*;
 
@@ -64,8 +64,8 @@ public class CatalogDiscService {
     }
 
     public PagedModel<MoldWebResponse> searchMolds(final List<SearchCriteria> search,
-                                             final Pageable pageable) {
-        final MoldSearchSpecificationBuilder builder = new MoldSearchSpecificationBuilder(search);
+                                                   final Pageable pageable) {
+        final SearchSpecificationBuilder<Mold> builder = new SearchSpecificationBuilder<>(search);
         final Page<Mold> moldPage = moldRepository.findAll(builder.build(), pageable);
 
         final List<CatalogDisc> catalogDiscs = catalogDiscRepository.findByMoldIn(moldPage.getContent());
